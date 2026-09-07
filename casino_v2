@@ -1,0 +1,289 @@
+x=0
+y=0
+Money = 100
+current_score = 0
+final_score = 0
+card = [0] * 10  # Max = 10 cards
+card_value = [0] * 10  # Max = 10 cards
+d_card = [0] * 10  # Max = 10 cards
+d_card_value = [0] * 10  # Max = 10 cards
+
+import time
+import math
+import random
+import sys
+print("------------------------------------")
+print("Welcome to the casino")
+#Set up^
+
+def dealer_turn():
+    global y, dealer_score, Money, bet
+    y = y + 1
+    d_card_drawn = random.sample(range(1, 52), 1)
+    d_prefix_value = math.ceil(d_card_drawn[0] / 4)
+    if d_prefix_value == 1:
+        d_card[y] = "Ace"
+    elif d_prefix_value == 2: 
+        d_card[y] = "2"
+    elif d_prefix_value == 3:
+        d_card[y] = "3"
+    elif d_prefix_value == 4:
+        d_card[y] = "4"
+    elif d_prefix_value == 5:
+        d_card[y] = "5"
+    elif d_prefix_value == 6:
+        d_card[y] = "6"
+    elif d_prefix_value == 7:
+        d_card[y] = "7"
+    elif d_prefix_value == 8:
+        d_card[y] = "8"
+    elif d_prefix_value == 9:
+        d_card[y] = "9"
+    elif d_prefix_value == 10:
+        d_card[y] = "10"
+    elif d_prefix_value == 11:
+        d_card[y] = "Jack"
+    elif d_prefix_value == 12:
+        d_card[y] = "Queen"
+    elif d_prefix_value == 13:
+        d_card[y] = "King"
+    d_card_value[y] = d_card[y]
+    if d_card_value[y] == "Ace":
+        repeat = 0
+        dealer_score = 0
+        while repeat < y - 1:
+            repeat = repeat + 1
+            dealer_score = dealer_score + int(d_card_value[repeat])
+        if dealer_score + 11 > 21:
+            d_card_value[y] = 1
+        else:
+            d_card_value[y] = 11
+    elif d_card_value[y] == "Jack" or d_card_value[y] == "Queen" or d_card_value[y] == "King":
+        d_card_value[y] = 10
+    d_card_value[y] = int(d_card_value[y])
+    suffix_value = d_card_drawn[0] % 4 #check suffix
+    if suffix_value == 1:
+        d_card[y] = d_card[y] + " of spades"
+    elif suffix_value == 2:
+        d_card[y] = d_card[y] + " of hearts"
+    elif suffix_value == 3:
+        d_card[y] = d_card[y] + " of diamonds"
+    elif suffix_value == 0:
+        d_card[y] = d_card[y] + " of clubs"
+    repeat = 0
+    success = True
+    while repeat < y:
+        repeat = repeat + 1
+        if d_card[y] == d_card[repeat] and y != repeat:
+            success = False
+            y = y - 1
+            dealer_turn()
+    if success == True:
+        print("The dealer has drawn: ", d_card[y])
+        if y < 2:
+            dealer_turn()
+        if y >= 2:
+            repeat = 0
+            dealer_score = 0
+            while repeat < y:
+                repeat = repeat + 1
+                dealer_score = dealer_score + int(d_card_value[repeat])
+        if dealer_score > 21:
+            print("The dealer has busted! His final score is: ", dealer_score)
+            print("You have won, thank you for playing Blackjack. Please come again!")
+            print("You have won your bet of $", bet)
+            Money = int(Money) + int(bet)
+            input_game()
+        elif dealer_score == 21:
+            if y == 2:
+                print("The dealer has hit a blackjack! His final score is: ", dealer_score)
+                print("You have lost, thank you for playing Blackjack. Please come again!")
+                print("You have lost your bet of $", bet)
+                Money = int(Money) - int(bet)
+            if y > 2:
+                print("The dealer has hit 21! His final score is: ", dealer_score)
+            print("You have lost, thank you for playing Blackjack. Please come again!")
+            print("You have lost your bet of $", bet)
+            Money = int(Money) - int(bet)
+            input_game()
+        elif dealer_score < 21:
+            print("The dealer's score is currently: ", dealer_score)
+            if dealer_score < 17:
+                time.sleep(2)
+                print("The dealer has chosen to hit.")
+                dealer_turn()
+            if dealer_score >= 17:
+                time.sleep(2)
+                print("The dealer has chosen to stand. His final score is: ", dealer_score)
+                if dealer_score > final_score:
+                    print("You have lost. Thank you for playing Blackjack. Please come again!")
+                    print("You have lost your bet of $", bet)
+                    Money = int(Money) - int(bet)
+                    input_game()
+                elif dealer_score < final_score:
+                    print("You have won. Thank you for playing Blackjack. Please come again!")
+                    print("You have won your bet of $", bet)
+                    Money = int(Money) + int(bet)
+                    input_game()
+                elif dealer_score == final_score:
+                    print("You have tied with the dealer and lost. Thank you for playing Blackjack. Please come again!")
+                    print("You have lost your bet of $", bet)
+                    Money = int(Money) - int(bet)
+                    input_game()
+
+
+
+def continue_blackjack():
+    Option = input("Would you like to hit or stand? (Hit, stand) ")
+    print("-----------------------------------")
+    if Option.lower() == "hit":
+        run_blackjack()
+    elif Option.lower() == "stand":
+        print("You have chosen to stand. Your final score is: ", final_score)
+        print("It is now the dealer's turn. They will draw until the get a 17 or higher.")
+        print("If they bust, you win. If they get a higher or the same score than you, you lose.")
+        print("------------------------------------")
+        time.sleep(3)
+        dealer_turn()
+    elif Option.lower() != "hit" and Option.lower() != "stand":
+        print("-----------------------------------")
+        print("Invalid option selected, please choose a valid option.")
+        continue_blackjack()
+
+def run_blackjack():
+    global x, y, final_score, Money, bet, card, card_value, d_card, d_card_value
+    x = x + 1
+    card_drawn = random.sample(range(1, 52), 1)
+    prefix_value = math.ceil(card_drawn[0] / 4)
+    if prefix_value == 1:
+        card[x] = "Ace"
+    elif prefix_value == 2: 
+        card[x] = "2"
+    elif prefix_value == 3:
+        card[x] = "3"
+    elif prefix_value == 4:
+        card[x] = "4"
+    elif prefix_value == 5:
+        card[x] = "5"
+    elif prefix_value == 6:
+        card[x] = "6"
+    elif prefix_value == 7:
+        card[x] = "7"
+    elif prefix_value == 8:
+        card[x] = "8"
+    elif prefix_value == 9:
+        card[x] = "9"
+    elif prefix_value == 10:
+        card[x] = "10"
+    elif prefix_value == 11:
+        card[x] = "Jack"
+    elif prefix_value == 12:
+        card[x] = "Queen"
+    elif prefix_value == 13:
+        card[x] = "King"
+    card_value[x] = card[x]
+
+    if card_value[x] == "Ace":
+        repeat = 0
+        final_score = 0
+        while repeat < x - 1:
+            repeat = repeat + 1
+            final_score = final_score + int(card_value[repeat])
+        if final_score + 11 > 21:
+            card_value[x] = 1
+        else:
+            card_value[x] = 11
+    elif card_value[x] == "Jack" or card_value[x] == "Queen" or card_value[x] == "King":
+        card_value[x] = 10
+
+    card_value[x] = int(card_value[x]) #convert to pure number
+    suffix_value = card_drawn[0] % 4 #check suffix
+    if suffix_value == 1:
+        card[x] = card[x] + " of spades"
+    elif suffix_value == 2:
+        card[x] = card[x] + " of hearts"
+    elif suffix_value == 3:
+        card[x] = card[x] + " of diamonds"
+    elif suffix_value == 0:
+        card[x] = card[x] + " of clubs"
+    repeat = 0
+    success = True
+    while repeat < x:
+        repeat = repeat + 1
+        if card[x] == card[repeat] and x != repeat:
+            success = False
+            x = x - 1
+            run_blackjack()
+    if success == True:
+        print("You have drawn: ", card[x])
+        if x < 2:
+            run_blackjack()
+        if x >= 2:
+            repeat = 0
+            final_score = 0
+            while repeat < x:
+                repeat = repeat + 1
+                final_score = final_score + int(card_value[repeat])
+        if final_score > 21:
+            print("Your total score is currently: ", final_score)
+            print("You have busted! Your final score is: ", final_score)
+            print("You have lost your bet of $", bet)
+            print("Thank you for playing Blackjack. Please come again!")
+            Money = int(Money) - int(bet)
+            input_game()
+        elif final_score == 21:
+            if x == 2:
+                print("Your total score is currently: ", final_score)
+                print("Congratulations, you hit a blackjack! Your final score is: ", final_score)
+                print("You have won your bet of $", bet)
+                print("Thank you for playing Blackjack. Please come again!")
+                Money = int(Money) + int(bet)
+                input_game()
+            if x > 2:
+                print("Your total score is currently: ", final_score)
+                print("Congratulations, you hit 21! Your final score is: ", final_score)
+                print("You have won your bet of $", bet)
+                print("Thank you for playing Blackjack. Please come again!")
+                Money = int(Money) + int(bet)
+                input_game()
+        elif final_score < 21:
+            print("Your total score is currently: ", final_score)
+            continue_blackjack()
+
+def input_game(): #Starting game / Asking what game
+    print("------------------------------------")
+    if Money > 0:
+        print("You currently have: $", Money)
+        game = input("What would you like to play? (Blackjack, Leave) ")
+        global x, y, bet, current_score, final_score, card, card_value
+        x=0
+        y=0
+        bet = 0
+        current_score = 0
+        final_score = 0
+        card = [0] * 10  # Max = 10 cards
+        card_value = [0] * 10  # Max = 10 cards
+        d_card = [0] * 10  # Max = 10 cards
+        d_card_value = [0] * 10  # Max = 10 cards
+        if game.lower() == "blackjack":
+            print("You have selected Blackjack. May the odds be in your favour!")
+            bet = input("How much would you like to bet? (You currently have: $"+str(Money)+") ")
+            while not bet.isdigit() or int(bet) <= 0 or int(bet) > int(Money):
+                print("Invalid bet. Please enter a valid number.")
+                bet = input("How much would you like to bet? (You currently have: $"+str(Money)+") ")
+            bet = int(bet)
+            print("Shuffling the deck and dealing cards...")
+            print("-----------------------------------")
+            time.sleep(2)
+            run_blackjack()
+        elif game.lower() == "leave":
+            print("Thank you for playing at the casino. Please come again!")
+            sys.exit()
+        else:
+            print("invalid game selected, please choose a valid game.")
+            input_game()
+    elif Money <= 0:
+        print("You have no money left to play. Please come again when you have more money.")
+        sys.exit()
+
+input_game() #start
